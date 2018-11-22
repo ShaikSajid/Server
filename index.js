@@ -1,26 +1,23 @@
 const express=require('express');
-const passport=require('passport');
-const GoogleStrategy=require('passport-google-oauth20');
-const keys=require('./config/keys.js');
+const mongoose=require('mongoose');
+const key=require('./config/keys');
+require('./models/users');
+require('./services/passport');
 
-passport.use(
-    new GoogleStrategy(
-{
-    clientID:keys.googleClientID,
-    clientSecret:keys.googleClientSecret,
-    callbackURL:'/auth/google/callback'
-},(accessToken,refreshToken,profile,done)=>{
-console.log('accessToken :'+accessToken);
-console.log('refreshToken :',refreshToken);
-console.log('profile :',profile);
-}
-)
-);
+//const authRoutes=require('./routes/authRoutes');
+console.log(key.mongooseURI);
+mongoose.Promise=global.Promise;
+mongoose.connect(key.mongooseURI,(err,client)=>{
+    if(err){
+        return console.log(err);
+    }
+    console.log('connected...')
+});
+   // mongoose.connect(key.mongooseURI,{useNewUrlParser: true});
 
 const app=express();
-
-app.get('/oauth/google',passport.authenticate('google',{scope:['profile','email']}));
-app.get('/auth/google/callback',passport.authenticate('google'));
+//authRoutes(app); is equals to below
+require('./routes/authRoutes')(app);
 
 const PORT=process.env.PORT||3000;
 app.listen(PORT,()=>{console.log("server started at port"+PORT)});
