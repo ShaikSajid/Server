@@ -1,11 +1,13 @@
 const express=require('express');
 const mongoose=require('mongoose');
+const cookieSession=require('cookie-session');
+const passport=require('passport');
 const key=require('./config/keys');
 require('./models/users');
 require('./services/passport');
 
 //const authRoutes=require('./routes/authRoutes');
-console.log(key.mongooseURI);
+
 mongoose.Promise=global.Promise;
 mongoose.connect(key.mongooseURI,(err,client)=>{
     if(err){
@@ -16,6 +18,15 @@ mongoose.connect(key.mongooseURI,(err,client)=>{
    // mongoose.connect(key.mongooseURI,{useNewUrlParser: true});
 
 const app=express();
+app.use(
+    cookieSession({
+        maxAge:30*24*60*60*1000,
+        keys:[key.cookieKey]
+    })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
 //authRoutes(app); is equals to below
 require('./routes/authRoutes')(app);
 
